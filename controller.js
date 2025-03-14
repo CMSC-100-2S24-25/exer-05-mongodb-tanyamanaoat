@@ -5,9 +5,9 @@ export const saveStudent = async (req, res) => {
     try {
         const studentData = req.body;
         const createdStudent = await Student.create(studentData);
-        res.json({ success: !!createdStudent });
+        res.json({ inserted: !!createdStudent });
     } catch (error) {
-        res.json({ success: false });
+        res.json({ inserted: false });
     }
 };
 
@@ -15,14 +15,13 @@ export const saveStudent = async (req, res) => {
 export const updateStudent = async (req, res) => {
     try {
         const { fname, lname } = req.body;
-        const updateResponse = await Student.findOneAndUpdate(
+        const updateResponse = await Student.updateOne(
             { fname },
-            { lname },
-            { new: true }
+            { $set: { lname } } 
         );
-        res.json({ success: !!updateResponse });
+        res.json({ updated: updateResponse.modifiedCount > 0 });
     } catch (error) {
-        res.json({ success: false });
+        res.json({ updated: false });
     }
 };
 
@@ -30,32 +29,35 @@ export const updateStudent = async (req, res) => {
 export const removeStudent = async (req, res) => {
     try {
         const { stdnum } = req.body;
-        const deletionResponse = await Student.findOneAndDelete({ stdnum });
-        res.json({ success: !!deletionResponse });
+        const deletionResponse = await Student.deleteOne({ stdnum });
+        res.json({ deleted: deletionResponse.deletedCount > 0 }); 
     } catch (error) {
-        res.json({ success: false });
+        res.json({ deleted: false });
     }
 };
+
 
 // Delete all student records
 export const removeAll = async (req, res) => {
     try {
-        const { deletedCount } = await Student.deleteMany();
-        res.json({ success: deletedCount > 0 });
+        const deletionResponse = await Student.deleteMany();
+        res.json({ deleted: deletionResponse.deletedCount > 0 }); 
     } catch (error) {
-        res.json({ success: false });
+        res.json({ deleted: false });
     }
 };
+
 
 // Retrieve a student's details
 export const getStudent = async (req, res) => {
     try {
-        const student = await Student.findOne({ stdnum: req.query.stdnum });
-        res.json(student || {});
+        const student = await Student.find({ stdnum: req.query.stdnum });
+        res.json(student); // Always return an array, even if empty
     } catch (error) {
-        res.json({});
+        res.json([]);
     }
 };
+
 
 // Retrieve all students
 export const getAll = async (req, res) => {
